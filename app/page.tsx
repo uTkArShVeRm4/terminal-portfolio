@@ -272,8 +272,7 @@ export default function Home() {
             $ whoami
           </h3>
           <p className="text-sm">
-            I&apos;m a passionate developer with a love for creating elegant solutions to complex problems. When I&apos;m not
-            coding, you can find me exploring new technologies or contributing to open-source projects.
+            I&apos;m a chronic terminal addict who is on a mission to convert you into one as well. I spend my days automating everything I can and writing terminal programs.
           </p>
         </div>
         <div className="card">
@@ -281,12 +280,11 @@ export default function Home() {
             $ skills --list
           </h3>
           <ul className="list-disc pl-5 text-sm">
-            <li>JavaScript/TypeScript</li>
-            <li>React & Next.js</li>
-            <li>Node.js</li>
-            <li>Python</li>
-            <li>Docker</li>
-            <li>AWS</li>
+            <li>Golang, Rust, Python</li>
+            <li>Cloud Infrastructure, DevOps, Kubernetes</li>
+            <li>Linux, Bash, Docker</li>
+            <li>AWS, GCP, Terraform</li>
+            <li>LLMs, Retrieval Augmented Generation</li>
           </ul>
         </div>
       </div>
@@ -296,14 +294,14 @@ export default function Home() {
         </h3>
         <div className="space-y-2 text-sm">
           <div>
-            <p className="text-white/80">2021 - Present</p>
-            <p className="font-bold">Senior Frontend Developer @ TechCorp</p>
-            <p className="text-xs">Leading development of web applications using React and Next.js</p>
+            <p className="text-white/80">Feb 2024 - Present</p>
+            <p className="font-bold">Research Engineer Intern @ SimPPL</p>
+            <p className="text-xs">Leading development of a whatsapp based digital literacy platform dedicated to transforming preventative healthcare for underserved women. </p>
           </div>
           <div>
-            <p className="text-white/80">2018 - 2021</p>
-            <p className="font-bold">Full Stack Developer @ StartupInc</p>
-            <p className="text-xs">Built and maintained various web applications using modern technologies</p>
+            <p className="text-white/80">Jul 2024 - Aug 2024</p>
+            <p className="font-bold">Data Analyst Intern @ Merkle DGS India</p>
+            <p className="text-xs">Conducted comprehensive market analysis and user sentiment analysis across attributes such as delivery, product quality, and cost. Built data pipelines to scrape insights from Home Depot, leading to the development of an LLM-based chatbot that enabled automated insight generation for product catalog managers in specific categories.k</p>
           </div>
         </div>
       </div>
@@ -316,49 +314,35 @@ export default function Home() {
       <h2 className="section-title text-lg">Projects</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="card">
-          <h3 className="font-bold" style={{ color: themes[theme] }}>
-            Project Alpha
-          </h3>
-          <p className="text-white/80 text-xs">React • Node.js • MongoDB</p>
-          <p className="my-2 text-sm">
-            A full-stack application for managing personal finances with real-time data visualization.
-          </p>
+          <h3 className="font-bold" style={{ color: themes[theme] }}>Simple Raytracer</h3>
+          <p className="text-white/80 text-xs">Rust</p>
+          <p className="my-2 text-sm">A simple raytracer written in Rust. First step of my graphics programming journey.</p>
           <div className="flex gap-2 mt-4">
-            <button className="btn">View Project</button>
-            <button className="btn">GitHub</button>
+            <button className="btn" onClick={() => window.open("https://github.com/utkarshverm4/raytracer")}>Github</button>
           </div>
         </div>
         <div className="card">
-          <h3 className="font-bold" style={{ color: themes[theme] }}>
-            Project Beta
-          </h3>
-          <p className="text-white/80 text-xs">Next.js • TypeScript • Tailwind</p>
-          <p className="my-2 text-sm">An e-commerce platform with advanced filtering and search capabilities.</p>
+          <h3 className="font-bold" style={{ color: themes[theme] }}>Toy Redis</h3>
+          <p className="text-white/80 text-xs">Rust</p>
+          <p className="my-2 text-sm">A toy Redis implementation in Rust.</p>
           <div className="flex gap-2 mt-4">
-            <button className="btn">View Project</button>
-            <button className="btn">GitHub</button>
+            <button className="btn" onClick={() => window.open("https://github.com/utkarshverm4/toy_redis")}>Github</button>
           </div>
         </div>
         <div className="card">
-          <h3 className="font-bold" style={{ color: themes[theme] }}>
-            Project Gamma
-          </h3>
-          <p className="text-white/80 text-xs">Python • Flask • TensorFlow</p>
-          <p className="my-2 text-sm">A machine learning application that predicts stock market trends.</p>
+          <h3 className="font-bold" style={{ color: themes[theme] }}>Chip-8 Emulator</h3>
+          <p className="text-white/80 text-xs">Rust</p>
+          <p className="my-2 text-sm">A Chip-8 emulator written in Rust. Diving into lower level architecture and spec implementation.</p>
           <div className="flex gap-2 mt-4">
-            <button className="btn">View Project</button>
-            <button className="btn">GitHub</button>
+            <button className="btn" onClick={() => window.open("https://github.com/utkarshverm4/chip8_emulator")}>Github</button>
           </div>
         </div>
         <div className="card">
-          <h3 className="font-bold" style={{ color: themes[theme] }}>
-            Project Delta
-          </h3>
-          <p className="text-white/80 text-xs">React Native • Firebase</p>
-          <p className="my-2 text-sm">A cross-platform mobile app for tracking fitness goals and workouts.</p>
+          <h3 className="font-bold" style={{ color: themes[theme] }}>Hecto</h3>
+          <p className="text-white/80 text-xs">Rust</p>
+          <p className="my-2 text-sm">A terminal based text editor written in Rust. Came from my neovim addiction.</p>
           <div className="flex gap-2 mt-4">
-            <button className="btn">View Project</button>
-            <button className="btn">GitHub</button>
+            <button className="btn" onClick={() => window.open("https://github.com/utkarshverm4/hecto")}>Github</button>   
           </div>
         </div>
       </div>
@@ -371,35 +355,25 @@ export default function Home() {
       <h2 className="section-title text-lg">Blog Posts</h2>
       <div className="space-y-4">
         <div className="card">
-          <h3 className="font-bold" style={{ color: themes[theme] }}>
-            Understanding React Server Components
-          </h3>
+          <h3 className="font-bold" style={{ color: themes[theme] }}>Coming Soon...</h3>
           <p className="text-white/80 text-xs">Published on May 15, 2023</p>
-          <p className="my-2 text-sm">
-            An in-depth look at React Server Components and how they change the way we build React applications.
-          </p>
+          <p className="my-2 text-sm">Underconstruction</p>
           <a href="#" className="hover:underline text-sm" style={{ color: themes[theme] }}>
             Read more →
           </a>
         </div>
         <div className="card">
-          <h3 className="font-bold" style={{ color: themes[theme] }}>
-            The Future of Web Development with AI
-          </h3>
+          <h3 className="font-bold" style={{ color: themes[theme] }}>Coming Soon...</h3>
           <p className="text-white/80 text-xs">Published on April 3, 2023</p>
-          <p className="my-2 text-sm">
-            Exploring how AI tools are changing the landscape of web development and what it means for developers.
-          </p>
+          <p className="my-2 text-sm">Underconstruction</p>
           <a href="#" className="hover:underline text-sm" style={{ color: themes[theme] }}>
             Read more →
           </a>
         </div>
         <div className="card">
-          <h3 className="font-bold" style={{ color: themes[theme] }}>
-            Building Accessible Web Applications
-          </h3>
+          <h3 className="font-bold" style={{ color: themes[theme] }}>Coming Soon...</h3>
           <p className="text-white/80 text-xs">Published on March 10, 2023</p>
-          <p className="my-2 text-sm">A comprehensive guide to making your web applications accessible to all users.</p>
+          <p className="my-2 text-sm">Underconstruction</p>
           <a href="#" className="hover:underline text-sm" style={{ color: themes[theme] }}>
             Read more →
           </a>
