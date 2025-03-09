@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Palette, Github, Linkedin, Twitter } from "lucide-react"
 
 // Color themes
@@ -35,7 +35,8 @@ export default function Home() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [theme, setTheme] = useState<keyof typeof themes>("cyan")
   const [showThemeMenu, setShowThemeMenu] = useState(false)
-  const [terminalSize, setTerminalSize] = useState<"normal" | "expanded">("normal")
+  const [terminalSize, setTerminalSize] = useState<"normal" | "expanded" | "fullscreen">("normal")
+
   const [isAnimating, setIsAnimating] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -43,6 +44,24 @@ export default function Home() {
   const outputRef = useRef<HTMLDivElement>(null)
   const themeMenuRef = useRef<HTMLDivElement>(null)
 
+
+const [showEmulator, setShowEmulator] = useState(false)
+
+
+  const [sampleRoms, setSampleRoms] = useState([
+    { name: "Brix", filename: "brix.ch8" },
+    { name: "Pong", filename: "pong.ch8" },
+    { name: "Tetris", filename: "tetris.ch8" }
+  ]);
+
+
+
+const handleLaunchEmulator = () => {
+  setShowEmulator(true)
+  // If we're not already in the projects section, switch to it
+    setCurrentSection("emulator")
+    handleTerminalResize("fullscreen")
+  }
 
 
   // Create stars
@@ -131,7 +150,7 @@ export default function Home() {
   }
 
   // Handle terminal size change
-  const handleTerminalResize = (size: "normal" | "expanded") => {
+  const handleTerminalResize = (size: "normal" | "expanded" | "fullscreen") => {
     if (terminalSize !== size) {
       setIsAnimating(true)
       setTerminalSize(size)
@@ -154,7 +173,7 @@ export default function Home() {
       output = ["ABOUT_OUTPUT"]
     } else if (trimmedCmd === "projects") {
       setCurrentSection("projects")
-      handleTerminalResize("expanded")
+      handleTerminalResize("fullscreen")
       output = ["PROJECTS_OUTPUT"]
     } else if (trimmedCmd === "blogs") {
       setCurrentSection("blogs")
@@ -207,15 +226,18 @@ export default function Home() {
   }
 
   // Handle tab navigation
-  const handleTabClick = (section: string) => {
-    setCurrentSection(section)
+ const handleTabClick = (section: string) => {
+  setCurrentSection(section)
 
-    if (section === "home") {
-      handleTerminalResize("normal")
-    } else {
-      handleTerminalResize("expanded")
-    }
+  if (section === "home") {
+    handleTerminalResize("normal")
+  } else if (section === "projects" || section === "emulator") {  
+    handleTerminalResize("fullscreen")
+  } else {
+    handleTerminalResize("expanded")
+  }
 
+if (section !== "emulator") {
     setCommandHistory([
       {
         command: section,
@@ -229,7 +251,13 @@ export default function Home() {
                 : ["BLOGS_OUTPUT"],
       },
     ])
+    
+    // Hide the emulator when switching to any other tab
+    if (section !== "emulator" && showEmulator) {
+      setShowEmulator(false)
+    }
   }
+} 
 
   // Handle command input
   const handleCommandInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -262,7 +290,226 @@ export default function Home() {
     }
   }, [isInitialized])
 
-  // Render about section
+
+const renderEmulator = () => (
+  <div className="mt-4 space-y-4">
+    <h2 className="section-title text-lg">CHIP-8 Emulator</h2>
+    
+    <div className="card p-4 flex flex-col items-center">
+      {/* Emulator controls - removed file input */}
+      <div className="controls mb-4 w-full flex flex-wrap justify-center gap-2">
+        <button id="start-button" className="btn">Start</button>
+        <button id="pause-button" className="btn">Pause</button>
+        <button id="restart-button" className="btn" disabled>Restart ROM</button>
+        <button id="reset-button" className="btn">Reset</button>
+      </div>
+      
+      {/* Sample ROMs section - expanded and styled better */}
+      <div className="w-full mb-4">
+        <h3 className="font-bold mb-2" style={{ color: themes[theme] }}>Available ROMs:</h3>
+        <div className="flex flex-wrap gap-2">
+          {sampleRoms.map((rom) => (
+            <button
+              key={rom.filename}
+              className="btn"
+              onClick={() => handleLoadSampleRom(rom.filename)}
+            >
+              {rom.name}
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      {/* Canvas for the emulator */}
+      <canvas 
+        id="chip8-canvas" 
+        width="960"
+        height="480"
+        className="border-2 border-gray-600 bg-black mb-4"
+        style={{ 
+          imageRendering: 'pixelated',
+          boxShadow: `0 0 20px ${themes[theme]}33`
+        }}
+      ></canvas>
+    </div>
+  </div>
+)
+
+// Update the handleLoadSampleRom function to reset the emulator first
+const handleLoadSampleRom = useCallback(async (filename: string) => {
+  try {
+    // Reset any currently running ROM first
+    const resetEvent = new CustomEvent('resetemulator');
+    document.dispatchEvent(resetEvent);
+    
+    // Then load the new ROM
+    const response = await fetch(`/roms/${filename}`);
+    const arrayBuffer = await response.arrayBuffer();
+    const romData = new Uint8Array(arrayBuffer);
+    
+    // Create a custom event to notify the emulator
+    const customEvent = new CustomEvent('loadrom', { 
+      detail: { romData }
+    });
+    document.dispatchEvent(customEvent);
+    
+  } catch (error) {
+    console.error("Failed to load ROM:", error);
+  }
+}, []);
+
+// Update the emulator script to listen for the reset event
+useEffect(() => {
+  if (showEmulator) {
+    // Create a script element
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.innerHTML = `
+      import init, { Emulator } from '/pkg/chip8_emulator.js';
+      
+      // Key mapping from keyboard to CHIP-8 keypad
+      const keyMap = {
+          '1': 0x1, '2': 0x2, '3': 0x3, '4': 0xC,
+          'q': 0x4, 'w': 0x5, 'e': 0x6, 'r': 0xD,
+          'a': 0x7, 's': 0x8, 'd': 0x9, 'f': 0xE,
+          'z': 0xA, 'x': 0x0, 'c': 0xB, 'v': 0xF
+      };
+      
+      let emulator = null;
+      let animationId = null;
+      let lastTime = 0;
+      const cyclesPerFrame = 10; // Adjust based on desired speed
+      let currentRomData = null; // Store the current ROM data
+      
+      async function run() {
+          // Initialize the WebAssembly module
+          await init();
+          
+          // Set up DOM elements
+          const canvas = document.getElementById('chip8-canvas');
+          const startButton = document.getElementById('start-button');
+          const pauseButton = document.getElementById('pause-button');
+          const restartButton = document.getElementById('restart-button');
+          const resetButton = document.getElementById('reset-button');
+          
+          // Create the emulator with 15px per CHIP-8 pixel
+          try {
+              emulator = new Emulator('chip8-canvas', 15);
+          } catch (e) {
+              console.error('Failed to create emulator:', e);
+              return;
+          }
+          
+          // Set up event listeners
+          startButton.addEventListener('click', startEmulation);
+          pauseButton.addEventListener('click', pauseEmulation);
+          restartButton.addEventListener('click', restartRom);
+          resetButton.addEventListener('click', resetEmulation);
+          
+          // Listen for custom loadrom events (for sample ROMs)
+          document.addEventListener('loadrom', (e) => {
+              loadRom(e.detail.romData);
+          });
+          
+          // Listen for reset event
+          document.addEventListener('resetemulator', resetEmulation);
+          
+          // Set up keyboard input
+          document.addEventListener('keydown', (event) => handleKey(event, true));
+          document.addEventListener('keyup', (event) => handleKey(event, false));
+      }
+      
+      function loadRom(romData) {
+          // Store the ROM data for later reuse
+          currentRomData = romData;
+          
+          // Load the ROM into the emulator
+          emulator.load_rom(romData);
+          
+          // Enable the restart button
+          document.getElementById('restart-button').disabled = false;
+          
+          // Start emulation automatically
+          startEmulation();
+      }
+      
+      function startEmulation() {
+          if (animationId) return;
+          lastTime = performance.now();
+          animationLoop();
+      }
+      
+      function pauseEmulation() {
+          if (animationId) {
+              cancelAnimationFrame(animationId);
+              animationId = null;
+          }
+      }
+      
+      function restartRom() {
+          // Pause the emulation
+          pauseEmulation();
+          
+          // Re-create the emulator
+          emulator = new Emulator('chip8-canvas', 15);
+          
+          // Re-load the current ROM
+          if (currentRomData) {
+              emulator.load_rom(currentRomData);
+              
+              // Restart the emulation
+              startEmulation();
+          }
+      }
+      
+      function resetEmulation() {
+          pauseEmulation();
+          
+          // Re-create the emulator
+          emulator = new Emulator('chip8-canvas', 15);
+          
+          // Reset the current ROM data
+          currentRomData = null;
+          
+          // Disable the restart button
+          document.getElementById('restart-button').disabled = true;
+      }
+      
+      function handleKey(event, pressed) {
+          const key = event.key.toLowerCase();
+          if (key in keyMap && emulator) {
+              emulator.set_key(keyMap[key], pressed);
+              event.preventDefault();
+          }
+      }
+      
+      function animationLoop(time = 0) {
+          animationId = requestAnimationFrame(animationLoop);
+          
+          // Calculate time delta and run appropriate number of cycles
+          const delta = time - lastTime;
+          const cyclesThisFrame = Math.floor(delta / 16.67 * cyclesPerFrame); // ~60 FPS target
+          
+          if (cyclesThisFrame > 0) {
+              for (let i = 0; i < cyclesThisFrame; i++) {
+                  emulator.cycle();
+              }
+              lastTime = time;
+          }
+      }
+      
+      // Start the application
+      run();
+    `;
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }
+}, [showEmulator, theme]);  // Render about section
   const renderAbout = () => (
     <div className="space-y-4">
       <h2 className="section-title text-lg">About Me</h2>
@@ -309,45 +556,54 @@ export default function Home() {
   )
 
   // Render projects section
-  const renderProjects = () => (
-    <div className="space-y-4">
-      <h2 className="section-title text-lg">Projects</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="card">
-          <h3 className="font-bold" style={{ color: themes[theme] }}>Simple Raytracer</h3>
-          <p className="text-white/80 text-xs">Rust</p>
-          <p className="my-2 text-sm">A simple raytracer written in Rust. First step of my graphics programming journey.</p>
-          <div className="flex gap-2 mt-4">
-            <button className="btn" onClick={() => window.open("https://github.com/utkarshverm4/raytracer")}>Github</button>
-          </div>
+const renderProjects = () => (
+  <div className="space-y-4">
+    <h2 className="section-title text-lg">Projects</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="card">
+        <h3 className="font-bold" style={{ color: themes[theme] }}>Simple Raytracer</h3>
+        <p className="text-white/80 text-xs">Rust</p>
+        <p className="my-2 text-sm">A simple raytracer written in Rust. First step of my graphics programming journey.</p>
+        <div className="flex gap-2 mt-4">
+          <button className="btn" onClick={() => window.open("https://github.com/utkarshverm4/raytracer")}>Github</button>
         </div>
-        <div className="card">
-          <h3 className="font-bold" style={{ color: themes[theme] }}>Toy Redis</h3>
-          <p className="text-white/80 text-xs">Rust</p>
-          <p className="my-2 text-sm">A toy Redis implementation in Rust.</p>
-          <div className="flex gap-2 mt-4">
-            <button className="btn" onClick={() => window.open("https://github.com/utkarshverm4/toy_redis")}>Github</button>
-          </div>
+      </div>
+      <div className="card">
+        <h3 className="font-bold" style={{ color: themes[theme] }}>Toy Redis</h3>
+        <p className="text-white/80 text-xs">Rust</p>
+        <p className="my-2 text-sm">A toy Redis implementation in Rust.</p>
+        <div className="flex gap-2 mt-4">
+          <button className="btn" onClick={() => window.open("https://github.com/utkarshverm4/toy_redis")}>Github</button>
         </div>
-        <div className="card">
-          <h3 className="font-bold" style={{ color: themes[theme] }}>Chip-8 Emulator</h3>
-          <p className="text-white/80 text-xs">Rust</p>
-          <p className="my-2 text-sm">A Chip-8 emulator written in Rust. Diving into lower level architecture and spec implementation.</p>
-          <div className="flex gap-2 mt-4">
-            <button className="btn" onClick={() => window.open("https://github.com/utkarshverm4/chip8_emulator")}>Github</button>
-          </div>
+      </div>
+      <div className="card">
+        <h3 className="font-bold" style={{ color: themes[theme] }}>Chip-8 Emulator</h3>
+        <p className="text-white/80 text-xs">Rust + WebAssembly</p>
+        <p className="my-2 text-sm">A Chip-8 emulator written in Rust and compiled to WebAssembly. Run classic games directly in your browser.</p>
+        <div className="flex gap-2 mt-4">
+          <button className="btn" onClick={() => window.open("https://github.com/utkarshverm4/chip8_emulator")}>Github</button>
+          <button 
+            className="btn" 
+            style={{ backgroundColor: themes[theme], opacity: 0.9 }}
+            onClick={handleLaunchEmulator}
+          >
+            Launch Emulator
+          </button>
         </div>
-        <div className="card">
-          <h3 className="font-bold" style={{ color: themes[theme] }}>Hecto</h3>
-          <p className="text-white/80 text-xs">Rust</p>
-          <p className="my-2 text-sm">A terminal based text editor written in Rust. Came from my neovim addiction.</p>
-          <div className="flex gap-2 mt-4">
-            <button className="btn" onClick={() => window.open("https://github.com/utkarshverm4/hecto")}>Github</button>   
-          </div>
+      </div>
+      <div className="card">
+        <h3 className="font-bold" style={{ color: themes[theme] }}>Hecto</h3>
+        <p className="text-white/80 text-xs">Rust</p>
+        <p className="my-2 text-sm">A terminal based text editor written in Rust. Came from my neovim addiction.</p>
+        <div className="flex gap-2 mt-4">
+          <button className="btn" onClick={() => window.open("https://github.com/utkarshverm4/hecto")}>Github</button>   
         </div>
       </div>
     </div>
-  )
+
+  </div>
+)
+  
 
   // Render blogs section
   const renderBlogs = () => (
@@ -426,15 +682,21 @@ export default function Home() {
         />
       </div>
 
-      <div
-        className={`terminal-window ${terminalSize === "expanded" ? "terminal-expanded" : ""}`}
-        ref={containerRef}
-        onClick={handleTerminalClick}
-        style={{
-          borderColor: themes[theme],
-          boxShadow: `0 0 80px ${themes[theme]}26, 0 0 32px ${themes[theme]}1A, 0 0 16px ${themes[theme]}0D, inset 0 0 8px rgba(255, 255, 255, 0.05)`,
-        }}
-      >
+     <div
+  className={`terminal-window ${
+    terminalSize === "expanded" 
+      ? "terminal-expanded" 
+      : terminalSize === "fullscreen" 
+        ? "terminal-fullscreen" 
+        : ""
+  }`}
+  ref={containerRef}
+  onClick={handleTerminalClick}
+  style={{
+    borderColor: themes[theme],
+    boxShadow: `0 0 80px ${themes[theme]}26, 0 0 32px ${themes[theme]}1A, 0 0 16px ${themes[theme]}0D, inset 0 0 8px rgba(255, 255, 255, 0.05)`,
+  }}
+> 
         {/* Terminal header */}
         <header className="terminal-header" style={{ borderBottomColor: `${themes[theme]}4D` }}>
           <div className="flex items-center gap-2">
@@ -460,31 +722,39 @@ export default function Home() {
         </header>
 
         {/* Terminal tabs */}
-        <div className="terminal-tabs" style={{ borderBottomColor: `${themes[theme]}4D` }}>
-          <button
-            className={`terminal-tab ${currentSection === "home" ? "active" : ""}`}
-            onClick={() => handleTabClick("home")}
-          >
-            home
-          </button>
-          <button
-            className={`terminal-tab ${currentSection === "projects" ? "active" : ""}`}
-            onClick={() => handleTabClick("projects")}
-          >
-            projects
-          </button>
-          <button
-            className={`terminal-tab ${currentSection === "about" ? "active" : ""}`}
-            onClick={() => handleTabClick("about")}
-          >
-            about
-          </button>
-          <button
-            className={`terminal-tab ${currentSection === "blogs" ? "active" : ""}`}
-            onClick={() => handleTabClick("blogs")}
-          >
-            blogs
-          </button>
+       <div className="terminal-tabs" style={{ borderBottomColor: `${themes[theme]}4D` }}>
+  <button
+    className={`terminal-tab ${currentSection === "home" ? "active" : ""}`}
+    onClick={() => handleTabClick("home")}
+  >
+    home
+  </button>
+  <button
+    className={`terminal-tab ${currentSection === "projects" ? "active" : ""}`}
+    onClick={() => handleTabClick("projects")}
+  >
+    projects
+  </button>
+  <button
+    className={`terminal-tab ${currentSection === "about" ? "active" : ""}`}
+    onClick={() => handleTabClick("about")}
+  >
+    about
+  </button>
+  <button
+    className={`terminal-tab ${currentSection === "blogs" ? "active" : ""}`}
+    onClick={() => handleTabClick("blogs")}
+  >
+    blogs
+  </button>
+  {showEmulator && (
+    <button
+      className={`terminal-tab ${currentSection === "emulator" ? "active" : ""}`}
+      onClick={() => setCurrentSection("emulator")}
+    >
+      emulator
+    </button>
+  )} 
           <div className="relative">
             <button className="terminal-tab flex items-center gap-2" onClick={() => setShowThemeMenu(!showThemeMenu)}>
               <Palette size={14} />
@@ -517,7 +787,9 @@ export default function Home() {
         <div className="terminal-content">
           <main className="overflow-auto terminal-output-area" ref={outputRef}>
             {/* Command history with block separation */}
-            {!isAnimating &&
+            {!isAnimating &&( 
+              <>
+              {currentSection !== "emulator" && (
               commandHistory.map((entry, index) => (
                 <div key={index} className="command-block">
                   <div className="prompt">~/portfolio git:(main) $</div>
@@ -601,7 +873,23 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-              ))}
+
+                
+              )))}
+{currentSection === "emulator" && showEmulator && (
+        <div className="command-block">
+          <div className="prompt">~/portfolio git:(main) $</div>
+          <div className="command">
+            <span style={{ color: themes[theme] }}>$</span>
+            <span>launch-emulator</span>
+          </div>
+          <div className="output">
+            {renderEmulator()}
+          </div>
+        </div>
+      )}
+    </>
+  )}
             {isAnimating && (
               <div className="flex items-center justify-center h-full">
                 <div className="loading-dots">
@@ -611,9 +899,11 @@ export default function Home() {
                 </div>
               </div>
             )}
+
           </main>
 
           {/* Command input - fixed at bottom */}
+          {!showEmulator && (
           <div className="command-input-block" style={{ borderTopColor: `${themes[theme]}4D` }}>
   <form onSubmit={handleCommandSubmit} className="flex items-center">
     <span className="text-white/60 text-sm mr-2">~/portfolio git:(main) $</span>
@@ -636,7 +926,7 @@ export default function Home() {
       />
     </div>
   </form>
-</div>       </div>
+</div>)}       </div>
       </div>
     </div>
   )

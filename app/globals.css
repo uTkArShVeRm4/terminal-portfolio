@@ -83,6 +83,11 @@ body {
   height: 700px;
 }
 
+.terminal-window.terminal-fullscreen {
+  max-width: 1400px;  
+  height: 850px;     
+}
+
 /* Terminal content structure */
 .terminal-content {
   display: flex;

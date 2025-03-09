@@ -1,0 +1,15 @@
+{
+  "name": "chip8_emulator",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "chip8_emulator_bg.wasm",
+    "chip8_emulator.js",
+    "chip8_emulator.d.ts"
+  ],
+  "main": "chip8_emulator.js",
+  "types": "chip8_emulator.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
