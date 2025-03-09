@@ -560,7 +560,7 @@ export default function Home() {
                               <span style={{ color: themes[theme] }} className="font-bold">
                                 READMEs Updated:
                               </span>
-                              <span>42</span>
+                              <span>0</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <span style={{ color: themes[theme] }} className="font-bold">
