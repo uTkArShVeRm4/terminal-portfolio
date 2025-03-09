@@ -43,6 +43,8 @@ export default function Home() {
   const outputRef = useRef<HTMLDivElement>(null)
   const themeMenuRef = useRef<HTMLDivElement>(null)
 
+
+
   // Create stars
   useEffect(() => {
     const starsContainer = document.createElement("div")
@@ -200,7 +202,7 @@ export default function Home() {
     if (outputRef.current) {
       setTimeout(() => {
         outputRef.current!.scrollTop = outputRef.current!.scrollHeight
-      }, 10)
+      }, 200)
     }
   }
 
@@ -606,19 +608,28 @@ export default function Home() {
 
           {/* Command input - fixed at bottom */}
           <div className="command-input-block" style={{ borderTopColor: `${themes[theme]}4D` }}>
-            <form onSubmit={handleCommandSubmit} className="flex items-center">
-              <span className="text-white/60 text-sm mr-2">~/portfolio git:(main) $</span>
-              <input
-                ref={inputRef}
-                type="text"
-                value={command}
-                onChange={handleCommandInput}
-                className="bg-transparent border-none outline-none flex-1 text-white command-input"
-                autoFocus
-              />
-            </form>
-          </div>
-        </div>
+  <form onSubmit={handleCommandSubmit} className="flex items-center">
+    <span className="text-white/60 text-sm mr-2">~/portfolio git:(main) $</span>
+    <div className="flex items-center relative">
+      {/* Display the command text */}
+      <span>{command}</span>
+      
+      {/* Blinking cursor */}
+      <span className="inline-block h-5 w-2 bg-white blink"></span>
+      
+      {/* Hidden actual input that captures keys */}
+      <input
+        ref={inputRef}
+        type="text"
+        value={command}
+        onChange={handleCommandInput}
+        className="absolute inset-0 opacity-0 w-full cursor-text"
+        style={{ caretColor: 'transparent' }}
+        autoFocus
+      />
+    </div>
+  </form>
+</div>       </div>
       </div>
     </div>
   )
