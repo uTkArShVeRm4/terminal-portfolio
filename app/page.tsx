@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { Palette } from "lucide-react"
+import { Palette, Github, Linkedin, Twitter } from "lucide-react"
 
 // Color themes
 const themes = {
@@ -408,6 +408,36 @@ export default function Home() {
     </div>
   )
 
+  // Render social media icons that match the current theme color
+  const renderSocialIcons = () => (
+    <div className="flex items-center gap-4 mt-3">
+      <a 
+        href="https://github.com/utkarshverm4" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="transition-transform hover:scale-110"
+      >
+        <Github size={20} color={themes[theme]} />
+      </a>
+      <a 
+        href="https://www.linkedin.com/in/utkarsh-verm4/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="transition-transform hover:scale-110"
+      >
+        <Linkedin size={20} color={themes[theme]} />
+      </a>
+      <a 
+        href="https://x.com/UtkrshVrm" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="transition-transform hover:scale-110"
+      >
+        <Twitter size={20} color={themes[theme]} />
+      </a>
+    </div>
+  )
+
   return (
     <div className="min-h-screen bg-black text-white font-mono relative overflow-hidden flex items-center justify-center">
       {/* Cursor glow effect */}
@@ -576,6 +606,9 @@ export default function Home() {
                               </span>
                               <span>$24,601</span>
                             </div>
+                            
+                            {/* Social Media Icons */}
+                            {renderSocialIcons()}
                           </div>
                         </div>
                       ) : entry.output[0] === "ABOUT_OUTPUT" ? (
