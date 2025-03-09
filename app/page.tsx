@@ -325,8 +325,8 @@ const renderEmulator = () => (
       {/* Canvas for the emulator */}
       <canvas 
         id="chip8-canvas" 
-        width="960"
-        height="480"
+        width="720"
+        height="360"
         className="border-2 border-gray-600 bg-black mb-4"
         style={{ 
           imageRendering: 'pixelated',
@@ -380,7 +380,7 @@ useEffect(() => {
       let emulator = null;
       let animationId = null;
       let lastTime = 0;
-      const cyclesPerFrame = 10; // Adjust based on desired speed
+      const cyclesPerFrame = 5; // Adjust based on desired speed
       let currentRomData = null; // Store the current ROM data
       
       async function run() {
@@ -396,7 +396,7 @@ useEffect(() => {
           
           // Create the emulator with 15px per CHIP-8 pixel
           try {
-              emulator = new Emulator('chip8-canvas', 15);
+              emulator = new Emulator('chip8-canvas', 10);
           } catch (e) {
               console.error('Failed to create emulator:', e);
               return;
@@ -453,7 +453,7 @@ useEffect(() => {
           pauseEmulation();
           
           // Re-create the emulator
-          emulator = new Emulator('chip8-canvas', 15);
+          emulator = new Emulator('chip8-canvas', 10);
           
           // Re-load the current ROM
           if (currentRomData) {
@@ -468,7 +468,7 @@ useEffect(() => {
           pauseEmulation();
           
           // Re-create the emulator
-          emulator = new Emulator('chip8-canvas', 15);
+          emulator = new Emulator('chip8-canvas', 10);
           
           // Reset the current ROM data
           currentRomData = null;
