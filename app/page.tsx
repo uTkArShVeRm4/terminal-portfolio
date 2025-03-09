@@ -43,24 +43,28 @@ export default function Home() {
   const themeMenuRef = useRef<HTMLDivElement>(null)
 
   // Create stars
-  useEffect(() => {
-    const starsContainer = document.createElement("div")
-    starsContainer.className = "stars"
+useEffect(() => {
+  const starsContainer = document.createElement("div")
+  starsContainer.className = "stars"
 
-    for (let i = 0; i < 500; i++) {
-      const star = document.createElement("div")
-      star.className = "star"
-      star.style.left = `${Math.random() * 100}%`
-      star.style.top = `${Math.random() * 100}%`
-      star.style.width = `${Math.random() * 2}px`
-      star.style.height = star.style.width
-      star.style.animationDelay = `${Math.random() * 4}s`
-      starsContainer.appendChild(star)
+  for (let i = 0; i < 500; i++) {
+    const star = document.createElement("div")
+    star.className = "star"
+    star.style.left = `${Math.random() * 100}%`
+    star.style.top = `${Math.random() * 100}%`
+    star.style.width = `${Math.random() * 2}px`
+    star.style.height = star.style.width
+    star.style.animationDelay = `${Math.random() * 4}s`
+    starsContainer.appendChild(star)
+  }
+
+  document.body.appendChild(starsContainer)
+  return () => {
+    if (document.body.contains(starsContainer)) {
+      document.body.removeChild(starsContainer)
     }
-
-    document.body.appendChild(starsContainer)
-    return () => document.body.removeChild(starsContainer)
-  }, [])
+  }
+}, [])
 
   // Update CSS variables when theme changes
   useEffect(() => {
@@ -227,11 +231,11 @@ export default function Home() {
   // Initial command
   useEffect(() => {
     executeCommand("neofetch")
-  }, [])
+  }, [executeCommand])
 
   useEffect(() => {
     executeCommand("help")
-  }, [])
+  }, [executeCommand])
 
   // Render about section
   const renderAbout = () => (
@@ -243,7 +247,7 @@ export default function Home() {
             $ whoami
           </h3>
           <p className="text-sm">
-            I'm a passionate developer with a love for creating elegant solutions to complex problems. When I'm not
+            I&apos;m a passionate developer with a love for creating elegant solutions to complex problems. When I&apos;m not
             coding, you can find me exploring new technologies or contributing to open-source projects.
           </p>
         </div>
