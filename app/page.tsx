@@ -37,34 +37,35 @@ export default function Home() {
   const [showThemeMenu, setShowThemeMenu] = useState(false)
   const [terminalSize, setTerminalSize] = useState<"normal" | "expanded">("normal")
   const [isAnimating, setIsAnimating] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const outputRef = useRef<HTMLDivElement>(null)
   const themeMenuRef = useRef<HTMLDivElement>(null)
 
   // Create stars
-useEffect(() => {
-  const starsContainer = document.createElement("div")
-  starsContainer.className = "stars"
+  useEffect(() => {
+    const starsContainer = document.createElement("div")
+    starsContainer.className = "stars"
 
-  for (let i = 0; i < 500; i++) {
-    const star = document.createElement("div")
-    star.className = "star"
-    star.style.left = `${Math.random() * 100}%`
-    star.style.top = `${Math.random() * 100}%`
-    star.style.width = `${Math.random() * 2}px`
-    star.style.height = star.style.width
-    star.style.animationDelay = `${Math.random() * 4}s`
-    starsContainer.appendChild(star)
-  }
-
-  document.body.appendChild(starsContainer)
-  return () => {
-    if (document.body.contains(starsContainer)) {
-      document.body.removeChild(starsContainer)
+    for (let i = 0; i < 500; i++) {
+      const star = document.createElement("div")
+      star.className = "star"
+      star.style.left = `${Math.random() * 100}%`
+      star.style.top = `${Math.random() * 100}%`
+      star.style.width = `${Math.random() * 2}px`
+      star.style.height = star.style.width
+      star.style.animationDelay = `${Math.random() * 4}s`
+      starsContainer.appendChild(star)
     }
-  }
-}, [])
+
+    document.body.appendChild(starsContainer)
+    return () => {
+      if (document.body.contains(starsContainer)) {
+        document.body.removeChild(starsContainer)
+      }
+    }
+  }, [])
 
   // Update CSS variables when theme changes
   useEffect(() => {
@@ -174,8 +175,19 @@ useEffect(() => {
     } else if (trimmedCmd === "clear") {
       setCommandHistory([])
       setCommand("")
-    executeCommand("neofetch")
-    executeCommand("help")
+      // Replace the direct function calls with new entry in command history
+      setCommandHistory([
+        { command: "neofetch", output: ["NEOFETCH_OUTPUT"] },
+        { command: "help", output: [
+          "Available commands:",
+          "  about     - View information about me",
+          "  projects  - View my projects",
+          "  blogs     - View my blog posts",
+          "  home      - Return to home screen",
+          "  clear     - Clear the terminal",
+          "  help      - Show this help message",
+        ] }
+      ])
       return
     } else if (trimmedCmd !== "") {
       output = [`Command not found: ${cmd}`]
@@ -228,14 +240,25 @@ useEffect(() => {
     executeCommand(command)
   }
 
-  // Initial command
+  // Initial commands - only run once
   useEffect(() => {
-    executeCommand("neofetch")
-  }, [executeCommand])
-
-  useEffect(() => {
-    executeCommand("help")
-  }, [executeCommand])
+    if (!isInitialized) {
+      // Set initial command history instead of calling executeCommand
+      setCommandHistory([
+        { command: "neofetch", output: ["NEOFETCH_OUTPUT"] },
+        { command: "help", output: [
+          "Available commands:",
+          "  about     - View information about me",
+          "  projects  - View my projects",
+          "  blogs     - View my blog posts",
+          "  home      - Return to home screen",
+          "  clear     - Clear the terminal",
+          "  help      - Show this help message",
+        ] }
+      ])
+      setIsInitialized(true)
+    }
+  }, [isInitialized])
 
   // Render about section
   const renderAbout = () => (
@@ -600,4 +623,3 @@ useEffect(() => {
     </div>
   )
 }
-
