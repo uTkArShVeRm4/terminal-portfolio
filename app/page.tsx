@@ -4,6 +4,12 @@ import type React from "react"
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Palette, Github, Linkedin, Twitter } from "lucide-react"
 
+type Rom = {
+  name: string;
+  filename: string;
+};
+
+
 // Color themes
 const themes = {
   red: "#ff3333",
@@ -46,16 +52,12 @@ export default function Home() {
 
 
 const [showEmulator, setShowEmulator] = useState(false)
-
-
-  const sampleRoms = useState([
-    { name: "Brix", filename: "brix.ch8" },
-    { name: "Pong", filename: "pong.ch8" },
-    { name: "Tetris", filename: "tetris.ch8" }
-  ]);
-
-
-
+  
+const sampleRoms: Rom[] = [
+  { name: "Brix", filename: "brix.ch8" },
+  { name: "Pong", filename: "pong.ch8" },
+  { name: "Tetris", filename: "tetris.ch8" }
+];
 const handleLaunchEmulator = () => {
   setShowEmulator(true)
   // If we're not already in the projects section, switch to it
