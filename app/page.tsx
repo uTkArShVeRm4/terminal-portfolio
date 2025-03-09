@@ -48,7 +48,7 @@ export default function Home() {
 const [showEmulator, setShowEmulator] = useState(false)
 
 
-  const [sampleRoms, setSampleRoms] = useState([
+  const sampleRoms = useState([
     { name: "Brix", filename: "brix.ch8" },
     { name: "Pong", filename: "pong.ch8" },
     { name: "Tetris", filename: "tetris.ch8" }
